@@ -8,18 +8,18 @@
 
 FROM python:3.9
 
-RUN apt update
-RUN apt install -y tcpdump
-RUN apt clean
+# Install system dependencies
+RUN apt update && apt install -y tcpdump && apt clean
 
-COPY netprobify /opt/netprobify/netprobify
+# Install python dependencies - done copying the code to leverage caching
+WORKDIR /opt/netprobify
 COPY requirements /opt/netprobify/requirements
+RUN pip install -r requirements/netprobify.txt
+
+# Copy the source code
+COPY netprobify /opt/netprobify/netprobify
 COPY netprobify_start.py /opt/netprobify/
 COPY VERSION /opt/netprobify/
 
-WORKDIR /opt/netprobify
-RUN pip install -r requirements/netprobify.txt
-
-# CLEANING
-
+# All done, we can start!
 CMD [ "python", "/opt/netprobify/netprobify_start.py" ]
