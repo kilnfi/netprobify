@@ -29,7 +29,7 @@ For example:
 ## How to run it
 
 To run netprobify you can:
-- run `sudo netprobify_start.py` from the source code
+- run `sudo netprobify_start.py` from the source code (optionally specify the configuration file to use)
 - or build a PEX and use it (see details in `How to build` section below)
 
 If you are willing to run it in production, the use of "stable" branch is recommended.
@@ -279,17 +279,38 @@ Raise an alert if the latency is above the threshold defined in the netprobify c
 Dynamic inventories are custom modules loaded automatically.
 The goal is to set dynamically targets based on dynamic sources such as a CMDB, an API etc...
 
-To load a dynamic inventory, you have to add a Python module in the dynamic_inventories directory.
+To load a dynamic inventory, you have to add a Python module in the `dynamic_inventories` directory.
 
 The module must contain a "start" method with the following parameters:
 - targets: dict shared among all processes (main process and dynamic inventories)
            Each modules should register its targets in "targets[module_name]"
-           The minimal targets parameters are defined in schema_config.yaml
+           The minimal targets parameters are defined in `schema_config.yaml`
 - module_name
 - logging_level
+- configuration file path - `{module_name}.yaml` in the same directory as netprobify's `config.yaml`
 
 All modules are started only at the netprobify startup in a dedicated subprocess.
 So, you may want the module to have an infinite loop.
+
+Here's a basic module regularily parsing its config and setting its netprobify targets with the ones in its configuration:
+```py
+import logging
+import yaml
+
+log = logging.getLogger(__name__)
+
+def start(targets, module_name, logging_level, config_file="example.yaml"):
+    log.setLevel(logging_level)
+    while True:
+        try:
+            with open(config_file, "r") as conf_file:
+                config = yaml.safe_load(conf_file)
+        except:
+            config = {}
+            log.exception("Could not parse the configuration file")
+        targets[module_name] = config.get('additional_targets', [])
+        sleep(config.get('refresh_rate', 10))
+```
 
 ## Other parameters
 

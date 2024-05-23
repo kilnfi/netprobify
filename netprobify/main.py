@@ -956,7 +956,7 @@ class NetProbify:
                     self.shared_dynamic_targets,
                     module_name,
                     self.global_vars["logging_level"],
-                    "{0}.yaml".format(module_name),
+                    os.path.join(os.path.dirname(self.config_file), f"{module_name}.yaml"),
                 ),
             )
             process.start()
