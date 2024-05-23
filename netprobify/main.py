@@ -1118,6 +1118,8 @@ def entrypoint():
         f = sys.argv[1]
         if os.path.isfile(f):
             start = NetProbify(f)
+        else:
+            raise Exception(f"{sys.argv[1]} is not a file")
     else:
         start = NetProbify()
 
