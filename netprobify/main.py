@@ -30,6 +30,7 @@ from netprobify.external import percentile
 from netprobify.metrics import (
     APP_HOST_RESOLUTION,
     APP_HOST_RESOLUTION_CHANGE,
+    APP_HOST_RESOLUTION_DURATION,
     APP_PROCESS_TIMED_OUT,
     APP_RELOAD_CONF_FAILED,
     APP_ROUND_TIME,
@@ -420,9 +421,16 @@ class NetProbify:
 
                 # we try to resolve the hostname if not a subnet
                 if not target.is_subnet:
+                    start = time.time()
                     new_ip = common.resolve_hostname(
                         target.config_destination, target.address_family
                     )
+                    end = time.time()
+                    APP_HOST_RESOLUTION_DURATION.labels(
+                        probe_name=self.global_vars["probe_name"],
+                        destination=target.name,
+                        address_family=target.address_family,
+                    ).set(end - start)
                 else:
                     new_ip = target.config_destination
 

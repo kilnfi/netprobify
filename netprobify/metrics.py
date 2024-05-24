@@ -128,6 +128,11 @@ APP_HOST_RESOLUTION = Gauge(
     "hostname resolution status.",
     ["probe_name", "destination", "address_family"],
 )
+APP_HOST_RESOLUTION_DURATION = Gauge(
+    "app_host_resolution_duration",
+    "hostname resolution duration.",
+    ["probe_name", "destination", "address_family"],
+)
 APP_HOST_RESOLUTION_CHANGE = Counter(
     "app_host_resolution_change_total",
     "number of hostname resolution change.",
