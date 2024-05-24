@@ -1,6 +1,7 @@
 ipam-client==0.6.2
 Flask
 flask-httpauth
+kubernetes==29.0.0
 prometheus_client
 pykwalify
 PyYAML
