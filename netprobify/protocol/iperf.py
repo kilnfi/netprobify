@@ -99,18 +99,27 @@ class Iperf(Target):
         logging_level -- logging level for targets class
         args -- to catch unused variable
         """
+        # Build the command as an argument list and run it without a shell so
+        # config-supplied values (destination, port, bandwidth, ...) can never
+        # be interpreted as shell syntax. The UDP flag is only appended for UDP
+        # targets; TCP runs must not receive a literal "None" argument.
+        command = [
+            "iperf",
+            "-c", str(self.destination),
+            "-p", str(self.dst_port),
+        ]
+        if self.protocol:
+            command.append(self.protocol)
+        command += [
+            "-b", str(self.bandwidth),
+            "-t", str(self.duration),
+            "--reportexclude", "CDMS",
+            "--reportstyle", "C",
+            "-P", str(self.num_streams),
+        ]
         try:
             iperf_results = subprocess.check_output(
-                "iperf -c {0} -p {1} {2} -b {3} -t {4} \
-                --reportexclude CDMS --reportstyle C -P {5}".format(
-                    self.destination,
-                    self.dst_port,
-                    self.protocol,
-                    self.bandwidth,
-                    self.duration,
-                    self.num_streams,
-                ),
-                shell=True,
+                command,
                 stderr=subprocess.DEVNULL,
                 universal_newlines=True,
             )
